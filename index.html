@@ -1,0 +1,674 @@
+<!doctype html>
+<html lang="da">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Dagens rutiner</title>
+<meta name="theme-color" content="#3A86C8">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Rutiner">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#EAF2F6;--surface:#FFFFFF;--ink:#17324D;--muted:#57708A;--line:#D3E0E8;
+  --sun:#F5B82E;--sun-ink:#3B2A00;--grass:#2F9E62;--coral:#E4505A;--sky:#3A86C8;--soft:#DCEBF4;
+  color-scheme:light;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#0F1E2C;--surface:#172B3D;--ink:#E8F1F7;--muted:#9AB2C5;--line:#284258;
+    --sun:#F7C552;--sun-ink:#2A1E00;--grass:#4CC283;--coral:#F06B73;--sky:#6AA9E0;--soft:#1E3850;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0F1E2C;--surface:#172B3D;--ink:#E8F1F7;--muted:#9AB2C5;--line:#284258;
+  --sun:#F7C552;--sun-ink:#2A1E00;--grass:#4CC283;--coral:#F06B73;--sky:#6AA9E0;--soft:#1E3850;
+  color-scheme:dark;
+}
+*,*::before,*::after{box-sizing:inherit}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Baloo 2",ui-rounded,"Nunito","Segoe UI",system-ui,sans-serif;font-size:17px;line-height:1.4;padding-bottom:92px;-webkit-tap-highlight-color:transparent}
+button,input,textarea{font:inherit;color:inherit}
+button{cursor:pointer;border:0;background:none}
+:focus-visible{outline:3px solid var(--sky);outline-offset:2px;border-radius:10px}
+.wrap{max-width:560px;margin:0 auto;padding:18px 16px 24px}
+h1{font-size:2.1rem;line-height:1;margin:0;font-weight:800;letter-spacing:-.01em}
+h2{font-size:1.35rem;margin:0 0 6px;font-weight:700}
+.date{color:var(--muted);font-weight:600;margin:4px 0 0}
+.muted{color:var(--muted)}
+
+/* Dagens bue */
+.arc{margin:16px 0 22px;background:var(--surface);border-radius:22px;padding:14px 16px 16px;border:1px solid var(--line)}
+.arc-top{display:flex;justify-content:space-between;align-items:baseline;gap:12px}
+.arc-count{font-size:1.6rem;font-weight:800}
+.arc-points{font-weight:700;color:var(--sun-ink);background:var(--sun);border-radius:999px;padding:2px 12px;white-space:nowrap}
+.beads{display:flex;gap:6px;margin-top:10px;flex-wrap:wrap}
+.bead{flex:1;min-width:18px;height:12px;border-radius:999px;background:var(--soft)}
+.bead.on{background:var(--grass)}
+
+/* Tidslinje */
+.timeline{position:relative;padding-left:64px}
+.timeline::before{content:"";position:absolute;left:46px;top:10px;bottom:10px;width:3px;border-radius:3px;background:var(--line)}
+.item{position:relative;margin-bottom:14px}
+.item .clock{position:absolute;left:-64px;top:14px;width:42px;text-align:right;font-weight:700;font-variant-numeric:tabular-nums;color:var(--muted);font-size:.95rem}
+.item .dot{position:absolute;left:-23px;top:20px;width:15px;height:15px;border-radius:50%;background:var(--surface);border:3px solid var(--line)}
+.item.done .dot{background:var(--grass);border-color:var(--grass)}
+.item.next .dot{background:var(--sun);border-color:var(--sun)}
+.item.next .clock{color:var(--ink)}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:12px 14px;display:flex;gap:12px;align-items:center}
+.item.next .card{border:2px solid var(--sun)}
+.emoji{font-size:2rem;line-height:1;width:40px;text-align:center;flex:none}
+.card .txt{flex:1;min-width:0}
+.card .title{font-weight:700;font-size:1.1rem;line-height:1.2}
+.card .note{color:var(--muted);font-size:.92rem;line-height:1.3}
+.chips{display:flex;flex-wrap:wrap;gap:4px;margin-top:4px}
+.chip{font-size:.8rem;background:var(--soft);border-radius:999px;padding:0 8px}
+.go{background:var(--sky);color:#fff;font-weight:700;border-radius:14px;padding:8px 14px;flex:none}
+.item.next .go{background:var(--sun);color:var(--sun-ink)}
+.badge{flex:none;text-align:right;font-weight:700;color:var(--grass);line-height:1.15}
+.badge small{display:block;color:var(--muted);font-weight:600}
+.item.done .title{text-decoration:line-through;text-decoration-thickness:2px;text-decoration-color:var(--grass)}
+
+/* Fanebar */
+.tabs{position:fixed;left:0;right:0;bottom:0;background:var(--surface);border-top:1px solid var(--line);display:flex;justify-content:center;padding:6px 8px calc(6px + env(safe-area-inset-bottom,0px));z-index:20}
+.tabs button{flex:1;max-width:170px;display:flex;flex-direction:column;align-items:center;font-weight:700;font-size:.85rem;color:var(--muted);padding:4px 0;border-radius:12px}
+.tabs button span{font-size:1.4rem;line-height:1.1}
+.tabs button[aria-current="page"]{color:var(--ink);background:var(--soft)}
+
+/* Forløb (overlay) */
+.flow{position:fixed;inset:0;background:var(--bg);z-index:40;overflow:auto;padding:calc(12px + env(safe-area-inset-top,0px)) 16px calc(24px + env(safe-area-inset-bottom,0px))}
+.flow .inner{max-width:520px;margin:0 auto;display:flex;flex-direction:column;align-items:center;text-align:center;min-height:100%}
+.close{align-self:flex-start;font-weight:700;color:var(--muted);padding:6px 4px}
+.big-emoji{font-size:5rem;line-height:1;margin:18px 0 6px}
+.flow h2{font-size:1.8rem;margin:0}
+.picks{display:grid;grid-template-columns:1fr 1fr;gap:12px;width:100%;margin-top:22px}
+.pick{background:var(--surface);border:2px solid var(--line);border-radius:20px;padding:18px 10px;font-weight:700;font-size:1.1rem;min-height:96px}
+.pick:active{border-color:var(--sky)}
+.primary{background:var(--grass);color:#fff;font-weight:800;font-size:1.35rem;border-radius:20px;padding:16px 28px;width:100%;margin-top:22px}
+.secondary{color:var(--muted);font-weight:700;padding:12px;margin-top:6px}
+.timer{font-size:clamp(4rem,22vw,7rem);font-weight:800;font-variant-numeric:tabular-nums;line-height:1;margin:26px 0 4px}
+.ring-wrap{position:relative;width:min(70vw,260px);aspect-ratio:1;margin-top:18px}
+.ring-wrap svg{width:100%;height:100%;transform:rotate(-90deg)}
+.ring-wrap .timer{position:absolute;inset:0;display:grid;place-items:center;margin:0;font-size:clamp(2.6rem,14vw,4rem)}
+.pill{display:inline-block;background:var(--soft);border-radius:999px;padding:2px 12px;font-weight:700;margin-top:8px}
+
+/* Spil */
+.arena{position:relative;width:100%;height:340px;border-radius:22px;background:var(--surface);border:2px solid var(--line);overflow:hidden;touch-action:none;margin-top:14px;cursor:crosshair}
+.pitch{background:repeating-linear-gradient(180deg,#3F9B4F 0 34px,#47A757 34px 68px);border-color:#2F7F3E;cursor:pointer}
+.pitch .box{position:absolute;left:6%;right:6%;top:0;height:64%;border:3px solid rgba(255,255,255,.7);border-top:0;pointer-events:none}
+.spot{position:absolute;bottom:50px;width:9px;height:9px;margin-left:-4px;border-radius:50%;background:rgba(255,255,255,.9);pointer-events:none}
+.goal{position:absolute;border:6px solid #fff;border-bottom:0;border-radius:4px 4px 0 0;pointer-events:none;
+  background:repeating-linear-gradient(0deg,rgba(255,255,255,.35) 0 1px,transparent 1px 12px),repeating-linear-gradient(90deg,rgba(255,255,255,.35) 0 1px,transparent 1px 12px),rgba(0,0,0,.14)}
+.goal.net{animation:net .4s}
+@keyframes net{50%{transform:scale(1.02,1.05)}}
+.keeper{position:absolute;left:0;top:0;width:64px;height:134px;pointer-events:none}
+.keeper::before{content:"";position:absolute;left:21px;top:0;width:22px;height:22px;border-radius:50%;background:#F2C9A0}
+.keeper i{position:absolute;left:4px;top:22px;bottom:0;width:56px;border-radius:14px 14px 6px 6px;background:linear-gradient(#F5B82E 0 55%,#17324D 55% 78%,#fff 78% 100%)}
+.keeper i::before,.keeper i::after{content:"";position:absolute;top:0;width:15px;height:15px;border-radius:50%;background:#fff;border:2px solid #17324D}
+.keeper i::before{left:-11px}.keeper i::after{right:-11px}
+.keeper.save{animation:dive .4s}
+@keyframes dive{50%{margin-top:-12px}}
+.ball{position:absolute;left:0;top:0;width:34px;height:34px;font-size:30px;line-height:34px;text-align:center;pointer-events:none;will-change:transform}
+.pitch .pop{color:#fff;text-shadow:0 2px 5px rgba(0,0,0,.55);white-space:nowrap}
+.pop{position:absolute;font-weight:800;font-size:1.4rem;pointer-events:none;transform:translate(-50%,-120%);animation:up .9s ease-out forwards}
+@keyframes up{to{transform:translate(-50%,-260%);opacity:0}}
+.shots{display:flex;gap:10px;justify-content:center;margin-top:10px;font-size:1.6rem}
+.shots .used{opacity:.25}
+.result{width:100%;display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:22px}
+.result div{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:12px}
+.result b{display:block;font-size:2rem;line-height:1.1}
+.record{margin-top:16px;background:var(--sun);color:var(--sun-ink);font-weight:800;border-radius:16px;padding:8px 16px}
+
+/* Statistik */
+.totals{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:16px 0 22px}
+.totals div{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:10px;text-align:center}
+.totals b{display:block;font-size:1.7rem;line-height:1.1}
+.totals span{color:var(--muted);font-size:.85rem;font-weight:600}
+.stat{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:14px;margin-bottom:12px}
+.stat-head{display:flex;align-items:center;gap:10px}
+.stat-head .title{font-weight:700;font-size:1.1rem}
+.nums{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:10px}
+.nums div{background:var(--soft);border-radius:12px;padding:6px;text-align:center}
+.nums b{display:block;font-size:1.15rem}
+.nums span{font-size:.78rem;color:var(--muted);font-weight:600}
+.week{display:flex;gap:6px;margin-top:10px}
+.week div{flex:1;text-align:center;font-size:.75rem;color:var(--muted);font-weight:600}
+.week i{display:block;height:22px;border-radius:7px;background:var(--soft);margin-bottom:2px}
+.week i.on{background:var(--grass)}
+.bars{display:flex;align-items:flex-end;gap:4px;height:56px;margin-top:10px}
+.bars i{flex:1;background:var(--sky);border-radius:5px 5px 2px 2px;min-height:4px}
+.bars i.best{background:var(--sun)}
+.fav{margin-top:8px;font-size:.92rem;color:var(--muted)}
+
+/* Indstil */
+.row{display:flex;align-items:center;gap:12px;background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:10px 12px;margin-bottom:8px}
+.row .txt{flex:1;min-width:0}
+.row .t{font-weight:700}
+.edit-btn{font-weight:700;color:var(--sky);padding:6px 8px}
+.add{width:100%;border:2px dashed var(--line);border-radius:16px;padding:14px;font-weight:700;color:var(--sky);margin:6px 0 20px}
+form.edit{background:var(--surface);border:2px solid var(--sky);border-radius:18px;padding:14px;margin-bottom:12px;text-align:left}
+label{display:block;font-weight:700;margin:10px 0 4px;font-size:.95rem}
+label small{font-weight:500;color:var(--muted)}
+input[type=text],input[type=time],textarea{width:100%;border:1px solid var(--line);background:var(--bg);border-radius:12px;padding:8px 10px}
+textarea{min-height:92px;resize:vertical}
+.two{display:grid;grid-template-columns:90px 1fr;gap:10px}
+.check{display:flex;align-items:center;gap:10px;font-weight:700;margin-top:12px}
+.check input{width:22px;height:22px}
+.form-btns{display:flex;gap:10px;margin-top:14px;flex-wrap:wrap}
+.form-btns .save{background:var(--grass);color:#fff;font-weight:800;border-radius:12px;padding:8px 18px}
+.form-btns .cancel{font-weight:700;color:var(--muted);padding:8px 10px}
+.form-btns .del{margin-left:auto;font-weight:700;color:var(--coral);padding:8px 10px}
+.note-box{background:var(--soft);border-radius:14px;padding:10px 12px;font-size:.92rem;margin:4px 0 14px}
+.ghost{font-weight:700;color:var(--muted);padding:8px 0}
+
+/* Alarm */
+.alarm{position:fixed;left:12px;right:12px;top:calc(10px + env(safe-area-inset-top,0px));z-index:60;max-width:520px;margin:0 auto;background:var(--sun);color:var(--sun-ink);border-radius:20px;padding:14px 16px;display:flex;align-items:center;gap:12px;box-shadow:0 10px 30px rgba(0,0,0,.25);animation:wob .6s ease-in-out 3}
+.alarm .txt{flex:1;font-weight:700;line-height:1.2}
+.alarm button{font-weight:800;border-radius:12px;padding:8px 12px}
+.alarm .yes{background:var(--ink);color:var(--surface)}
+@keyframes wob{25%{transform:rotate(-1.5deg)}75%{transform:rotate(1.5deg)}}
+/* Kode */
+.pin{display:flex;flex-direction:column;align-items:center;text-align:center;margin-top:28px}
+.pin-dots{display:flex;gap:14px;margin:18px 0 6px}
+.pin-dots i{width:18px;height:18px;border-radius:50%;border:3px solid var(--line)}
+.pin-dots i.on{background:var(--ink);border-color:var(--ink)}
+.pad{display:grid;grid-template-columns:repeat(3,72px);gap:12px;margin-top:10px}
+.pad button{height:72px;border-radius:50%;background:var(--surface);border:1px solid var(--line);font-size:1.6rem;font-weight:700}
+.pad button:active{background:var(--soft)}
+.primary.danger{background:var(--coral)}
+.pin-msg{min-height:1.5em;font-weight:700;color:var(--coral);margin:0}
+.shake{animation:shake .35s}
+@keyframes shake{25%{transform:translateX(-8px)}75%{transform:translateX(8px)}}
+@media (prefers-reduced-motion:reduce){.alarm{animation:none}.shake{animation:none}.pop{animation-duration:.01s}}
+</style>
+</head>
+<body>
+<main class="wrap" id="app"></main>
+<nav class="tabs" id="tabs"></nav>
+<div id="layer"></div>
+
+<script>
+(function(){
+"use strict";
+const LS = "dagens-rutiner-v1";
+const DEFAULT = {
+  tasks: [
+    {id:"t1", time:"07:00", emoji:"👕", title:"Op og i tøjet", note:"Tøjet ligger klar på stolen", alarm:true, activities:[]},
+    {id:"t2", time:"07:20", emoji:"🥣", title:"Morgenmad", note:"", alarm:false, activities:[]},
+    {id:"t3", time:"07:40", emoji:"🪥", title:"Børst tænder", note:"To minutter", alarm:false, activities:[]},
+    {id:"t4", time:"15:30", emoji:"🛋️", title:"Ro-tid", note:"Vælg én ting at lave", alarm:true, activities:["Læs en bog","Tegn en tegning","Spil et kortspil","Putte"]},
+    {id:"t5", time:"17:45", emoji:"🍽️", title:"Dæk bord", note:"", alarm:true, activities:[]},
+    {id:"t6", time:"19:30", emoji:"🌙", title:"Godnat", note:"Nattøj, tænder, tisse", alarm:true, activities:[]}
+  ],
+  log: []
+};
+const clone = o => JSON.parse(JSON.stringify(o));
+let S = (() => { try { const r = localStorage.getItem(LS); if (r) { const d = JSON.parse(r); if (d && Array.isArray(d.tasks)) return d; } } catch(e){} return clone(DEFAULT); })();
+if (!Array.isArray(S.log)) S.log = [];
+
+function save(){
+  if (S.log.length > 1500) S.log = S.log.slice(-1500);
+  try { localStorage.setItem(LS, JSON.stringify(S)); } catch(e){}
+}
+
+/* Hjælpere */
+function h(tag, attrs, ...kids){
+  const el = document.createElement(tag);
+  for (const [k, v] of Object.entries(attrs || {})){
+    if (k === "class") el.className = v;
+    else if (k === "style") el.setAttribute("style", v);
+    else if (k.startsWith("on")) el.addEventListener(k.slice(2), v);
+    else if (v === true) el.setAttribute(k, "");
+    else if (v !== false && v != null) el.setAttribute(k, v);
+  }
+  for (const c of kids.flat()){ if (c == null || c === false) continue; el.append(c instanceof Node ? c : document.createTextNode(String(c))); }
+  return el;
+}
+const pad = n => String(n).padStart(2, "0");
+const dayKey = (d = new Date()) => d.getFullYear() + "-" + pad(d.getMonth()+1) + "-" + pad(d.getDate());
+const nowHM = () => { const d = new Date(); return pad(d.getHours()) + ":" + pad(d.getMinutes()); };
+function fmt(s){ s = Math.max(0, Math.round(s)); const hh = Math.floor(s/3600), m = Math.floor(s%3600/60), x = s%60; return hh ? hh + ":" + pad(m) + ":" + pad(x) : m + ":" + pad(x); }
+const sorted = () => S.tasks.slice().sort((a, b) => a.time.localeCompare(b.time));
+const doneToday = t => { const today = dayKey(); for (let i = S.log.length-1; i >= 0; i--){ const l = S.log[i]; if (l.t === t.id && l.d === today) return l; } return null; };
+const newId = () => "t" + Math.random().toString(36).slice(2, 9);
+
+/* Lyd */
+let audio = null;
+function unlockAudio(){ if (!audio){ try { audio = new (window.AudioContext || window.webkitAudioContext)(); } catch(e){} } if (audio && audio.state === "suspended") audio.resume(); }
+document.addEventListener("pointerdown", unlockAudio, {passive:true});
+function tone(freq, start, dur, vol = .25, type = "sine"){
+  if (!audio) return;
+  const o = audio.createOscillator(), g = audio.createGain();
+  o.type = type; o.frequency.value = freq;
+  g.gain.setValueAtTime(0, audio.currentTime + start);
+  g.gain.linearRampToValueAtTime(vol, audio.currentTime + start + .02);
+  g.gain.exponentialRampToValueAtTime(.001, audio.currentTime + start + dur);
+  o.connect(g).connect(audio.destination); o.start(audio.currentTime + start); o.stop(audio.currentTime + start + dur + .05);
+}
+function chime(){ unlockAudio(); for (let r = 0; r < 3; r++){ tone(784, r*1.1, .5); tone(988, r*1.1 + .18, .5); tone(1175, r*1.1 + .36, .7); } if (navigator.vibrate) navigator.vibrate([300,150,300,150,300]); }
+const blip = (good) => { unlockAudio(); good ? (tone(660, 0, .12, .2, "triangle"), tone(990, .08, .2, .2, "triangle")) : tone(220, 0, .2, .15, "square"); };
+
+/* Navigation */
+let view = "idag";
+const TABS = [["idag","☀️","I dag"],["stat","⭐","Statistik"],["indstil","✏️","Indstil"]];
+function renderTabs(){
+  const nav = document.getElementById("tabs"); nav.replaceChildren();
+  for (const [id, ic, label] of TABS){
+    nav.append(h("button", {"aria-current": view === id ? "page" : false, onclick: () => { view = id; editing = null; if (id !== "indstil") { unlocked = false; pinMode = null; } render(); window.scrollTo(0,0); }}, h("span", {"aria-hidden":"true"}, ic), label));
+  }
+}
+function render(){
+  renderTabs();
+  const app = document.getElementById("app");
+  app.replaceChildren(view === "idag" ? viewToday() : view === "stat" ? viewStats() : (unlocked ? viewSettings() : viewPin()));
+}
+
+/* I dag */
+function viewToday(){
+  const tasks = sorted();
+  const done = tasks.filter(doneToday);
+  const pts = S.log.filter(l => l.d === dayKey()).reduce((a, l) => a + (l.p || 0), 0);
+  const next = tasks.find(t => !doneToday(t));
+  const dateTxt = new Date().toLocaleDateString("da-DK", {weekday:"long", day:"numeric", month:"long"});
+  const frag = h("div", null,
+    h("h1", null, "I dag"),
+    h("p", {class:"date"}, dateTxt.charAt(0).toUpperCase() + dateTxt.slice(1)),
+    h("section", {class:"arc", "aria-label":"Dagens fremskridt"},
+      h("div", {class:"arc-top"},
+        h("div", {class:"arc-count"}, done.length + " af " + tasks.length + " klaret"),
+        h("div", {class:"arc-points"}, "⭐ " + pts + " point")),
+      h("div", {class:"beads"}, tasks.map(t => h("i", {class:"bead" + (doneToday(t) ? " on" : ""), title:t.title})))
+    )
+  );
+  if (!tasks.length){
+    frag.append(h("p", {class:"note-box"}, "Der er ingen opgaver endnu. Gå til Indstil og tilføj dagens første."));
+    return frag;
+  }
+  const tl = h("div", {class:"timeline"});
+  for (const t of tasks){
+    const d = doneToday(t);
+    const isNext = t === next;
+    tl.append(h("div", {class:"item" + (d ? " done" : "") + (isNext ? " next" : "")},
+      h("div", {class:"clock"}, t.time),
+      h("div", {class:"dot", "aria-hidden":"true"}),
+      h("div", {class:"card"},
+        h("div", {class:"emoji", "aria-hidden":"true"}, t.emoji || "✅"),
+        h("div", {class:"txt"},
+          h("div", {class:"title"}, t.title),
+          d && d.a ? h("div", {class:"note"}, d.a) : (t.note ? h("div", {class:"note"}, t.note) : null),
+          !d && t.activities && t.activities.length ? h("div", {class:"chips"}, t.activities.map(a => h("span", {class:"chip"}, a))) : null),
+        d ? h("div", {class:"badge"}, "✓ " + (d.s != null ? fmt(d.s) : "Klaret"), h("small", null, "⭐ " + (d.p || 0)))
+          : h("button", {class:"go", onclick: () => openFlow(t)}, "Start"))
+    ));
+  }
+  frag.append(tl);
+  if (done.length) frag.append(h("div", {style:"text-align:center;margin-top:8px"},
+    h("button", {class:"ghost", onclick: () => askPin("Nulstil dagen", "Dagens " + done.length + " klarede opgaver og deres point slettes. Indtast koden for at fortsætte.", resetDay)}, "↺ Nulstil dagen")));
+  return frag;
+}
+function resetDay(){
+  const today = dayKey();
+  S.log = S.log.filter(l => l.d !== today);
+  for (const k of Array.from(rung)) if (k.includes(today)) rung.delete(k);
+  save(); render();
+}
+
+/* Forløb: vælg → tid → spil → resultat */
+let flowTick = null, anim = null;
+function closeFlow(){ clearInterval(flowTick); cancelAnimationFrame(anim); document.getElementById("layer").replaceChildren(); document.body.style.overflow = ""; render(); }
+function openFlow(task){
+  unlockAudio();
+  const st = {task, activity:null, start:0, secs:0};
+  document.body.style.overflow = "hidden";
+  const layer = document.getElementById("layer");
+  const shell = h("div", {class:"flow", role:"dialog", "aria-modal":"true", "aria-label":task.title});
+  const inner = h("div", {class:"inner"});
+  shell.append(inner); layer.replaceChildren(shell);
+  const head = () => [h("button", {class:"close", onclick: closeFlow}, "✕ Luk"), h("div", {class:"big-emoji", "aria-hidden":"true"}, task.emoji || "✅"), h("h2", null, task.title)];
+
+  function stepPick(){
+    inner.replaceChildren(...head(), h("p", {class:"muted"}, "Hvad vil du lave?"),
+      h("div", {class:"picks"}, task.activities.map(a => h("button", {class:"pick", onclick: () => { st.activity = a; stepReady(); }}, a))));
+  }
+  function stepReady(){
+    const best = bestTime(task.id);
+    inner.replaceChildren(...head(),
+      st.activity ? h("div", {class:"pill"}, st.activity) : null,
+      task.note ? h("p", {class:"muted"}, task.note) : null,
+      best != null ? h("p", {class:"muted"}, "Din rekord er " + fmt(best) + ". Kan du slå den?") : h("p", {class:"muted"}, "Tryk start, når du går i gang."),
+      h("button", {class:"primary", onclick: stepRun}, "Start tiden"),
+      h("button", {class:"secondary", onclick: () => { st.secs = null; stepGame(); }}, "Jeg er allerede færdig"));
+  }
+  function stepRun(){
+    st.start = Date.now();
+    const best = bestTime(task.id);
+    const R = 54, C = 2 * Math.PI * R;
+    const prog = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+    const bg = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+    for (const c of [bg, prog]){ c.setAttribute("cx","60"); c.setAttribute("cy","60"); c.setAttribute("r", R); c.setAttribute("fill","none"); c.setAttribute("stroke-width","10"); c.setAttribute("stroke-linecap","round"); }
+    bg.setAttribute("stroke","var(--soft)"); prog.setAttribute("stroke","var(--sky)");
+    prog.setAttribute("stroke-dasharray", C); prog.setAttribute("stroke-dashoffset", C);
+    const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg"); svg.setAttribute("viewBox","0 0 120 120"); svg.append(bg, prog);
+    const tEl = h("div", {class:"timer", "aria-live":"off"}, "0:00");
+    inner.replaceChildren(...head(), st.activity ? h("div", {class:"pill"}, st.activity) : null,
+      h("div", {class:"ring-wrap"}, svg, tEl),
+      best != null ? h("p", {class:"muted"}, "Rekord: " + fmt(best)) : null,
+      h("button", {class:"primary", onclick: () => { clearInterval(flowTick); st.secs = Math.round((Date.now() - st.start)/1000); stepGame(); }}, "Færdig!"),
+      h("button", {class:"secondary", onclick: () => { clearInterval(flowTick); stepReady(); }}, "Afbryd"));
+    const lap = best && best > 0 ? best : 300;
+    flowTick = setInterval(() => {
+      const s = (Date.now() - st.start)/1000;
+      tEl.textContent = fmt(s);
+      const f = Math.min(1, s / lap);
+      prog.setAttribute("stroke-dashoffset", C * (1 - f));
+      if (best && s > best) prog.setAttribute("stroke", "var(--coral)");
+    }, 250);
+  }
+  function stepGame(){
+    const arena = h("div", {class:"arena pitch", "aria-label":"Straffespark: tryk i målet, hvor bolden skal hen"});
+    const goal = h("div", {class:"goal"}), keeper = h("div", {class:"keeper"}, h("i")), ball = h("div", {class:"ball"}, "⚽"), spot = h("div", {class:"spot"});
+    arena.append(h("div", {class:"box"}), goal, keeper, spot, ball);
+    const shotsEl = h("div", {class:"shots", "aria-label":"Skud tilbage"}, [0,1,2].map(() => h("span", null, "⚽")));
+    const scoreEl = h("p", {class:"muted"}, "0 point");
+    inner.replaceChildren(h("h2", null, "Godt klaret!"), h("p", {class:"muted"}, "Tid til straffespark! Tryk der i målet, hvor bolden skal hen. Hjørnerne giver flest point – men pas på målmanden."), arena, shotsEl, scoreEl);
+    const KW = 64;
+    let G = null, kx = 0, kv = 2.55, shots = 0, total = 0, busy = false, done = false;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) kv = 1.4;
+    function resetBall(){ ball.style.transition = "none"; ball.style.transform = "translate(" + (arena.clientWidth/2 - 17) + "px," + (arena.clientHeight - 64) + "px) scale(1)"; }
+    function layout(){
+      const w = arena.clientWidth;
+      G = {x: Math.round(w * .12), y: 26, w: Math.round(w * .76), h: 134};
+      goal.style.left = G.x + "px"; goal.style.top = G.y + "px"; goal.style.width = G.w + "px"; goal.style.height = G.h + "px"; keeper.style.height = G.h + "px";
+      spot.style.left = (w/2) + "px";
+      kx = Math.min(Math.max(kx, 0), G.w - KW);
+      if (!busy) resetBall();
+    }
+    layout(); kx = G.w/2 - KW/2;
+    if (window.ResizeObserver) new ResizeObserver(() => { if (!done) layout(); }).observe(arena);
+    function frame(){
+      kx += kv;
+      if (Math.random() < .012) kv = -kv;
+      if (kx < 0){ kx = 0; kv = Math.abs(kv); }
+      if (kx > G.w - KW){ kx = G.w - KW; kv = -Math.abs(kv); }
+      keeper.style.transform = "translate(" + (G.x + kx) + "px," + G.y + "px)";
+      if (!done) anim = requestAnimationFrame(frame);
+    }
+    anim = requestAnimationFrame(frame);
+    arena.addEventListener("pointerdown", ev => {
+      if (done || busy) return;
+      busy = true;
+      const r = arena.getBoundingClientRect();
+      const px = ev.clientX - r.left, py = ev.clientY - r.top;
+      shots++; shotsEl.children[shots-1].className = "used";
+      ball.style.transition = "transform .45s cubic-bezier(.2,.7,.3,1)";
+      ball.style.transform = "translate(" + (px - 17) + "px," + (py - 17) + "px) scale(.62)";
+      setTimeout(() => {
+        const inGoal = px > G.x + 4 && px < G.x + G.w - 4 && py > G.y + 4 && py < G.y + G.h;
+        const saved = inGoal && px > G.x + kx - 10 && px < G.x + kx + KW + 10;
+        let p = 0, txt;
+        if (!inGoal) txt = "Forbi!";
+        else if (saved){ txt = "Redning!"; keeper.classList.add("save"); setTimeout(() => keeper.classList.remove("save"), 400); }
+        else {
+          const u = (px - G.x) / G.w, v = (py - G.y) / G.h, side = u < .22 || u > .78;
+          p = side && v < .42 ? 10 : side ? 6 : 3;
+          txt = p === 10 ? "I krydset! +10" : "MÅL! +" + p;
+          goal.classList.add("net"); setTimeout(() => goal.classList.remove("net"), 400);
+        }
+        total += p; blip(p > 0);
+        arena.append(h("div", {class:"pop", style:"left:" + px + "px;top:" + py + "px"}, txt));
+        scoreEl.textContent = total + " point";
+        kv *= 1.35;
+        if (shots >= 3){ done = true; setTimeout(() => finish(total), 1000); }
+        else setTimeout(() => { resetBall(); busy = false; }, 750);
+      }, 460);
+    });
+  }
+  function finish(gamePts){
+    const prevBest = bestTime(task.id);
+    const record = st.secs != null && st.secs > 0 && (prevBest == null || st.secs < prevBest);
+    const bonus = record && prevBest != null ? 5 : 0;
+    const pts = 5 + gamePts + bonus;
+    S.log.push({t:task.id, a:st.activity, d:dayKey(), s:st.secs, p:pts, at:Date.now()});
+    save();
+    if (record) { tone(523,0,.2); tone(659,.15,.2); tone(784,.3,.2); tone(1046,.45,.5); }
+    inner.replaceChildren(
+      h("div", {class:"big-emoji", "aria-hidden":"true"}, record ? "🏆" : "🌟"),
+      h("h2", null, task.title + " er klaret"),
+      st.activity ? h("div", {class:"pill"}, st.activity) : null,
+      h("div", {class:"result"},
+        h("div", null, h("b", null, st.secs != null ? fmt(st.secs) : "–"), h("span", {class:"muted"}, "tid")),
+        h("div", null, h("b", null, "⭐ " + pts), h("span", {class:"muted"}, "point i alt"))),
+      h("p", {class:"muted"}, "5 for at klare den + " + gamePts + " fra straffesparkene" + (bonus ? " + 5 for ny rekord" : "")),
+      record && prevBest != null ? h("div", {class:"record"}, "Ny rekord! Du slog " + fmt(prevBest)) : null,
+      record && prevBest == null ? h("div", {class:"record"}, "Første tid er sat – nu er der en rekord at slå") : null,
+      h("button", {class:"primary", onclick: closeFlow}, "Tilbage til dagen"));
+  }
+  task.activities && task.activities.length ? stepPick() : stepReady();
+}
+
+/* Bekræftelse (erstatter confirm/alert, som er blokeret i indlejrede sider) */
+function askConfirm(titleTxt, descTxt, okLabel, onOk){
+  const layer = document.getElementById("layer");
+  const close = () => { layer.replaceChildren(); document.body.style.overflow = ""; };
+  document.body.style.overflow = "hidden";
+  layer.replaceChildren(h("div", {class:"flow", role:"alertdialog", "aria-modal":"true", "aria-label":titleTxt},
+    h("div", {class:"inner"}, h("div", {class:"pin"}, h("h2", null, titleTxt), h("p", {class:"muted"}, descTxt),
+      okLabel ? h("button", {class:"primary danger", onclick: () => { close(); onOk(); }}, okLabel) : null,
+      h("button", {class:"secondary", onclick: close}, okLabel ? "Annuller" : "OK")))));
+}
+
+/* Kode-bekræftelse (modal) */
+let modalPress = null;
+function askPin(titleTxt, descTxt, onOk){
+  if (!S.pin){ askConfirm("Ingen kode endnu", "Vælg først en kode under Indstil.", null); return; }
+  let entry = "";
+  const layer = document.getElementById("layer");
+  const dots = h("div", {class:"pin-dots", "aria-live":"polite"}), msg = h("p", {class:"pin-msg", role:"alert"});
+  const close = () => { modalPress = null; layer.replaceChildren(); document.body.style.overflow = ""; };
+  const upd = () => dots.replaceChildren(...[0,1,2,3].map(i => h("i", {class: i < entry.length ? "on" : ""})));
+  async function submit(){
+    if (await hashPin(entry) === S.pin){ close(); onOk(); }
+    else { msg.textContent = "Forkert kode"; entry = ""; dots.classList.remove("shake"); void dots.offsetWidth; dots.classList.add("shake"); if (navigator.vibrate) navigator.vibrate(120); upd(); }
+  }
+  modalPress = k => {
+    if (k === "⌫") entry = entry.slice(0, -1); else if (entry.length < 4){ entry += k; msg.textContent = ""; } else return;
+    upd(); if (entry.length === 4) setTimeout(submit, 120);
+  };
+  const keys = ["1","2","3","4","5","6","7","8","9","","0","⌫"];
+  const pad = h("div", {class:"pad"}, keys.map(k => k ? h("button", {type:"button", "aria-label": k === "⌫" ? "Slet" : k, onclick: () => modalPress && modalPress(k)}, k) : h("span")));
+  upd();
+  document.body.style.overflow = "hidden";
+  layer.replaceChildren(h("div", {class:"flow", role:"dialog", "aria-modal":"true", "aria-label":titleTxt},
+    h("div", {class:"inner"}, h("button", {class:"close", onclick: close}, "✕ Annuller"),
+      h("div", {class:"pin"}, h("div", {class:"big-emoji", "aria-hidden":"true", style:"margin:0"}, "🔒"), h("h2", null, titleTxt), h("p", {class:"muted"}, descTxt), dots, msg, pad))));
+}
+document.addEventListener("keydown", e => {
+  if (!modalPress) return;
+  if (/^[0-9]$/.test(e.key)) modalPress(e.key); else if (e.key === "Backspace") modalPress("⌫"); else if (e.key === "Escape"){ modalPress = null; document.getElementById("layer").replaceChildren(); document.body.style.overflow = ""; }
+});
+
+/* Statistik */
+function bestTime(id){ let b = null; for (const l of S.log) if (l.t === id && l.s > 0 && (b == null || l.s < b)) b = l.s; return b; }
+function streak(){
+  const days = new Set(S.log.map(l => l.d));
+  const d = new Date(); let n = 0;
+  if (!days.has(dayKey(d))) d.setDate(d.getDate() - 1);
+  while (days.has(dayKey(d))){ n++; d.setDate(d.getDate() - 1); }
+  return n;
+}
+function viewStats(){
+  const total = S.log.reduce((a, l) => a + (l.p || 0), 0);
+  const frag = h("div", null, h("h1", null, "Statistik"),
+    h("div", {class:"totals"},
+      h("div", null, h("b", null, total), h("span", null, "point i alt")),
+      h("div", null, h("b", null, S.log.length), h("span", null, "opgaver klaret")),
+      h("div", null, h("b", null, streak()), h("span", null, "dage i træk"))));
+  if (!S.log.length){ frag.append(h("p", {class:"note-box"}, "Når du klarer din første opgave, kommer dine tider og point til at stå her.")); return frag; }
+  const letters = ["S","M","T","O","T","F","L"];
+  for (const t of sorted()){
+    const logs = S.log.filter(l => l.t === t.id);
+    if (!logs.length) continue;
+    const timed = logs.filter(l => l.s > 0);
+    const best = bestTime(t.id);
+    const avg = timed.length ? timed.reduce((a, l) => a + l.s, 0) / timed.length : null;
+    const week = [];
+    for (let i = 6; i >= 0; i--){ const d = new Date(); d.setDate(d.getDate() - i); const k = dayKey(d); week.push(h("div", null, h("i", {class: logs.some(l => l.d === k) ? "on" : ""}), letters[d.getDay()])); }
+    const last = timed.slice(-12); const max = Math.max(...last.map(l => l.s), 1);
+    const favs = {}; logs.forEach(l => { if (l.a) favs[l.a] = (favs[l.a] || 0) + 1; });
+    const favTxt = Object.entries(favs).sort((a, b) => b[1] - a[1]).map(([a, n]) => a + " " + n + "×").join(", ");
+    frag.append(h("section", {class:"stat"},
+      h("div", {class:"stat-head"}, h("div", {class:"emoji", "aria-hidden":"true"}, t.emoji || "✅"), h("div", {class:"title"}, t.title)),
+      h("div", {class:"nums"},
+        h("div", null, h("b", null, logs.length), h("span", null, "gange")),
+        h("div", null, h("b", null, best != null ? fmt(best) : "–"), h("span", null, "rekord")),
+        h("div", null, h("b", null, avg != null ? fmt(avg) : "–"), h("span", null, "gennemsnit"))),
+      h("div", {class:"week", "aria-label":"Sidste 7 dage"}, week),
+      last.length > 1 ? h("div", {class:"bars", "aria-label":"Seneste tider, lav søjle er hurtig"}, last.map(l => h("i", {class: l.s === best ? "best" : "", style:"height:" + Math.max(8, l.s / max * 100) + "%", title: fmt(l.s)}))) : null,
+      last.length > 1 ? h("div", {class:"fav"}, "Seneste tider – jo lavere søjle, jo hurtigere. Gul er rekorden.") : null,
+      favTxt ? h("div", {class:"fav"}, "Valgt: " + favTxt) : null));
+  }
+  return frag;
+}
+
+/* Indstil */
+let editing = null;
+let unlocked = false, pinMode = null, pinPress = null;
+async function hashPin(p){
+  try { const b = await crypto.subtle.digest("SHA-256", new TextEncoder().encode("rutiner:" + p)); return Array.from(new Uint8Array(b)).map(x => x.toString(16).padStart(2, "0")).join(""); }
+  catch(e){ return "p:" + p; }
+}
+function forgotPin(){
+  const a = 12 + Math.floor(Math.random()*8), b = 13 + Math.floor(Math.random()*7);
+  const svar = prompt("For voksne: hvad er " + a + " × " + b + "?");
+  if (svar === null) return;
+  if (parseInt(svar, 10) === a * b){ delete S.pin; save(); render(); }
+  else askConfirm("Forkert svar", "Koden er ikke nulstillet.", null);
+}
+function viewPin(){
+  let stage = (!S.pin || pinMode === "change") ? "new" : "enter", first = "", entry = "";
+  const title = h("h2", null), info = h("p", {class:"muted"}), dots = h("div", {class:"pin-dots", "aria-live":"polite"}), msg = h("p", {class:"pin-msg", role:"alert"});
+  function upd(){
+    title.textContent = stage === "enter" ? "Indtast kode" : stage === "new" ? (S.pin ? "Vælg en ny kode" : "Vælg en kode") : "Gentag koden";
+    info.textContent = stage === "enter" ? "Indstil er låst med en kode." : "4 cifre. Koden låser Indstil, så kun voksne kan ændre opgaverne.";
+    dots.replaceChildren(...[0,1,2,3].map(i => h("i", {class: i < entry.length ? "on" : ""})));
+    dots.setAttribute("aria-label", entry.length + " af 4 cifre");
+  }
+  function fail(text){ msg.textContent = text; entry = ""; dots.classList.remove("shake"); void dots.offsetWidth; dots.classList.add("shake"); if (navigator.vibrate) navigator.vibrate(120); upd(); }
+  async function submit(){
+    if (stage === "enter"){
+      if (await hashPin(entry) === S.pin){ unlocked = true; render(); } else fail("Forkert kode");
+    } else if (stage === "new"){
+      first = entry; entry = ""; stage = "repeat"; msg.textContent = ""; upd();
+    } else {
+      if (entry === first){ S.pin = await hashPin(entry); save(); unlocked = true; pinMode = null; render(); }
+      else { stage = "new"; first = ""; fail("Koderne var ikke ens. Prøv igen."); }
+    }
+  }
+  pinPress = k => {
+    if (k === "⌫") entry = entry.slice(0, -1); else if (entry.length < 4) entry += k; else return;
+    if (k !== "⌫") msg.textContent = "";
+    upd(); if (entry.length === 4) setTimeout(submit, 120);
+  };
+  const keys = ["1","2","3","4","5","6","7","8","9","","0","⌫"];
+  const pad = h("div", {class:"pad"}, keys.map(k => k ? h("button", {type:"button", "aria-label": k === "⌫" ? "Slet" : k, onclick: () => pinPress(k)}, k) : h("span")));
+  upd();
+  return h("div", null, h("h1", null, "Indstil"),
+    h("div", {class:"pin"}, h("div", {class:"big-emoji", "aria-hidden":"true", style:"margin:0"}, "🔒"), title, info, dots, msg, pad,
+      pinMode === "change" ? h("button", {class:"secondary", onclick: () => { pinMode = null; unlocked = true; render(); }}, "Annuller") : null,
+      stage === "enter" ? h("button", {class:"secondary", onclick: forgotPin}, "Glemt koden?") : null));
+}
+document.addEventListener("keydown", e => {
+  if (view !== "indstil" || unlocked || !pinPress || document.querySelector(".flow")) return;
+  if (/^[0-9]$/.test(e.key)) pinPress(e.key); else if (e.key === "Backspace") pinPress("⌫");
+});
+document.addEventListener("visibilitychange", () => { if (document.hidden && unlocked){ unlocked = false; pinMode = null; editing = null; if (view === "indstil") render(); } });
+function viewSettings(){
+  const frag = h("div", null, h("h1", null, "Indstil"),
+    h("p", {class:"date"}, "Opgaver, tider og aktiviteter"));
+  frag.append(h("div", {style:"height:14px"}));
+  if (editing === "new") frag.append(editForm(null));
+  for (const t of sorted()){
+    if (editing === t.id){ frag.append(editForm(t)); continue; }
+    frag.append(h("div", {class:"row"},
+      h("div", {class:"emoji", "aria-hidden":"true"}, t.emoji || "✅"),
+      h("div", {class:"txt"}, h("div", {class:"t"}, t.time + "  " + t.title),
+        h("div", {class:"muted", style:"font-size:.88rem"}, [t.alarm ? "🔔 Alarm" : null, t.activities && t.activities.length ? t.activities.length + " aktiviteter" : null].filter(Boolean).join(", ") || "Ingen alarm")),
+      h("button", {class:"edit-btn", onclick: () => { editing = t.id; render(); }}, "Rediger")));
+  }
+  if (editing !== "new") frag.append(h("button", {class:"add", onclick: () => { editing = "new"; render(); window.scrollTo(0,0); }}, "+ Tilføj opgave"));
+  frag.append(
+    h("p", {class:"note-box"}, "🔔 Alarmen spiller kun, mens appen er åben på skærmen. Lad den stå fremme på en tablet eller telefon med skærmen tændt. Opgaver og statistik gemmes kun på denne enhed."),
+    h("button", {class:"ghost", onclick: chime}, "▶ Test alarmlyden"), h("br"),
+    h("button", {class:"ghost", onclick: () => { pinMode = "change"; unlocked = false; editing = null; render(); }}, "🔑 Skift kode"), h("br"),
+    h("button", {class:"ghost", onclick: () => { unlocked = false; editing = null; render(); }}, "🔒 Lås nu"), h("br"),
+    h("button", {class:"ghost", style:"color:var(--coral)", onclick: () => askConfirm("Nulstil statistik", "Alle tider og point slettes. Opgaverne bliver.", "Nulstil", () => { S.log = []; save(); render(); })}, "Nulstil statistik"));
+  return frag;
+}
+function editForm(t){
+  const isNew = !t;
+  t = t || {id:newId(), time:nowHM(), emoji:"⭐", title:"", note:"", alarm:true, activities:[]};
+  const f = h("form", {class:"edit"});
+  const emoji = h("input", {type:"text", value:t.emoji, maxlength:"4", "aria-label":"Ikon"});
+  const time = h("input", {type:"time", value:t.time, required:true});
+  const title = h("input", {type:"text", value:t.title, placeholder:"Fx Pak skoletaske", required:true});
+  const note = h("input", {type:"text", value:t.note || "", placeholder:"Fx Husk madpakken"});
+  const acts = h("textarea", {placeholder:"Læs en bog\nTegn en tegning"}); acts.value = (t.activities || []).join("\n");
+  const alarm = h("input", {type:"checkbox", id:"al-" + t.id}); alarm.checked = !!t.alarm;
+  f.append(
+    h("div", {class:"two"}, h("div", null, h("label", null, "Ikon"), emoji), h("div", null, h("label", null, "Tidspunkt"), time)),
+    h("label", null, "Opgave"), title,
+    h("label", null, "Tekst ", h("small", null, "valgfri")), note,
+    h("label", null, "Aktiviteter at vælge imellem ", h("small", null, "én pr. linje, valgfri")), acts,
+    h("label", {class:"check", for:"al-" + t.id}, alarm, "Alarm på tidspunktet"),
+    h("div", {class:"form-btns"},
+      h("button", {type:"submit", class:"save"}, isNew ? "Tilføj" : "Gem"),
+      h("button", {type:"button", class:"cancel", onclick: () => { editing = null; render(); }}, "Annuller"),
+      isNew ? null : h("button", {type:"button", class:"del", onclick: () => askConfirm("Slet opgave", "Vil du slette " + t.title + "?", "Slet", () => { S.tasks = S.tasks.filter(x => x.id !== t.id); save(); editing = null; render(); })}, "Slet")));
+  f.addEventListener("submit", ev => {
+    ev.preventDefault();
+    const data = {id:t.id, time:time.value || "08:00", emoji:emoji.value.trim() || "⭐", title:title.value.trim() || "Opgave", note:note.value.trim(), alarm:alarm.checked,
+      activities: acts.value.split("\n").map(s => s.trim()).filter(Boolean).slice(0, 8)};
+    const i = S.tasks.findIndex(x => x.id === t.id);
+    if (i >= 0) S.tasks[i] = data; else S.tasks.push(data);
+    save(); editing = null; render();
+  });
+  setTimeout(() => title.focus(), 30);
+  return f;
+}
+
+/* Alarm-tjek */
+const rung = new Set();
+function checkAlarms(){
+  const hm = nowHM(), today = dayKey();
+  for (const t of S.tasks){
+    const key = t.id + today + t.time;
+    if (t.alarm && t.time === hm && !doneToday(t) && !rung.has(key)){ rung.add(key); showAlarm(t); break; }
+  }
+}
+function showAlarm(t){
+  chime();
+  const box = h("div", {class:"alarm", role:"alert"},
+    h("div", {class:"emoji", "aria-hidden":"true"}, t.emoji || "⏰"),
+    h("div", {class:"txt"}, "Det er tid til: " + t.title),
+    h("button", {class:"yes", onclick: () => { box.remove(); openFlow(t); }}, "Start"),
+    h("button", {onclick: () => box.remove()}, "Senere"));
+  document.body.append(box);
+}
+setInterval(checkAlarms, 15000);
+setInterval(() => { if (view === "idag" && !document.querySelector(".flow")) render(); }, 60000);
+
+render();
+if ("serviceWorker" in navigator && location.protocol === "https:") navigator.serviceWorker.register("sw.js").catch(()=>{});
+})();
+</script>
+</body>
+</html>
