@@ -1,5 +1,5 @@
 // Gør appen brugbar offline. Hæv versionen ved ændringer, så nye filer hentes.
-const CACHE = "rutiner-v5";
+const CACHE = "rutiner-v6";
 const FILES = ["./", "index.html", "manifest.webmanifest", "icon.svg", "icon-180.png", "icon-192.png", "icon-512.png"];
 self.addEventListener("install", e => { e.waitUntil(caches.open(CACHE).then(c => c.addAll(FILES))); self.skipWaiting(); });
 self.addEventListener("activate", e => {
